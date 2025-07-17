@@ -139,6 +139,10 @@ vim.opt.breakindent = true
 -- Save undo history
 vim.opt.undofile = true
 
+-- Remember cursor position and file locations
+vim.opt.viewoptions = 'cursor,folds'
+vim.opt.sessionoptions = 'buffers,curdir,folds,tabpages,winsize,winpos'
+
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -179,6 +183,21 @@ vim.opt.scrolloff = 10
 vim.opt.lazyredraw = true
 vim.opt.regexpengine = 1
 vim.opt.synmaxcol = 300
+
+-- Font and ligature settings (for GUI nvim clients only)
+if vim.g.neovide then
+  vim.o.guifont = "Cascadia Code:h12"
+  vim.g.neovide_font_hinting = "full"
+  vim.g.neovide_font_edging = "subpixelantialias"
+  vim.g.neovide_line_height = 1.2
+elseif vim.g.fvim_loaded then
+  vim.o.guifont = "Cascadia Code:h12"
+elseif vim.fn.exists('*GuiFont') == 1 then
+  vim.fn.GuiFont('Cascadia Code:h12')
+end
+
+-- Note: For terminal nvim, font and ligatures are configured in your terminal emulator
+-- See ~/.config/nvim/setup_ligatures.md for terminal setup instructions
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -280,6 +299,7 @@ vim.keymap.set('n', '<leader>d', '<cmd>CopilotChatToggle<CR>', { desc = 'Toggle 
 vim.keymap.set('n', '<leader>x', '<cmd>CopilotChatFix<CR>', { desc = 'Copilot fi[X] suggestion' })
 vim.keymap.set('n', '<leader>q', '<cmd>CopilotChatExplain<CR>', { desc = 'Copilot e[Q]plain code' })
 vim.keymap.set('n', '<leader>w', '<C-w>w', { desc = 'S[W]itch windows (cycling)' })
+vim.keymap.set('n', '<leader>z', '<cmd>Telescope find_files<CR>', { desc = 'Find files ([Z]oom to files)' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -292,6 +312,19 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.highlight.on_yank()
+  end,
+})
+
+-- Remember cursor position and restore it when reopening files
+vim.api.nvim_create_autocmd('BufReadPost', {
+  desc = 'Restore cursor position when reopening files',
+  group = vim.api.nvim_create_augroup('restore-cursor', { clear = true }),
+  callback = function()
+    local mark = vim.api.nvim_buf_get_mark(0, '"')
+    local lcount = vim.api.nvim_buf_line_count(0)
+    if mark[1] > 0 and mark[1] <= lcount then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
   end,
 })
 
