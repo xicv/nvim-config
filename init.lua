@@ -84,14 +84,20 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
--- Set <space> as the leader key
+-- Set <comma> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+vim.g.mapleader = ','
+vim.g.maplocalleader = ','
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+
+-- Disable unused providers to improve startup time and remove health warnings
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -148,6 +154,9 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
 
+-- Enable incremental search
+vim.opt.incsearch = true
+
 -- Show which line your cursor is on
 vim.opt.cursorline = true
 
@@ -189,6 +198,81 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Buffer navigation
+vim.keymap.set('n', '<S-h>', ':bprevious<CR>', { desc = 'Previous buffer' })
+vim.keymap.set('n', '<S-l>', ':bnext<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { desc = '[B]uffer [D]elete' })
+
+-- Quick save and quit
+vim.keymap.set('n', '<leader>w', ':w<CR>', { desc = '[W]rite file' })
+vim.keymap.set('n', '<leader>Q', ':qa<CR>', { desc = '[Q]uit all' })
+
+-- Better indenting
+vim.keymap.set('v', '<', '<gv', { desc = 'Indent left and reselect' })
+vim.keymap.set('v', '>', '>gv', { desc = 'Indent right and reselect' })
+
+-- Move lines up and down
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==', { desc = 'Move line down' })
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==', { desc = 'Move line up' })
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
+-- Better paste in visual mode
+vim.keymap.set('v', 'p', '"_dP', { desc = 'Paste without yanking' })
+
+-- Clear search highlighting
+vim.keymap.set('n', '<leader>hl', ':nohlsearch<CR>', { desc = 'Clear search [H]igh[L]ight' })
+
+-- Modern navigation improvements
+vim.keymap.set('n', 'J', 'mzJ`z', { desc = 'Join lines and keep cursor position' })
+vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Half page down and center' })
+vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Half page up and center' })
+vim.keymap.set('n', 'n', 'nzzzv', { desc = 'Next search result and center' })
+vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'Previous search result and center' })
+
+-- Better register management
+vim.keymap.set('x', '<leader>p', [["_dP]], { desc = 'Paste without yanking selection' })
+vim.keymap.set({'n', 'v'}, '<leader>y', [["+y]], { desc = 'Yank to system clipboard' })
+vim.keymap.set('n', '<leader>Y', [["+Y]], { desc = 'Yank line to system clipboard' })
+vim.keymap.set({'n', 'v'}, '<leader>D', [["_d]], { desc = 'Delete without yanking' })
+
+-- Quick substitution (moved to different key to avoid conflict)
+vim.keymap.set('n', '<leader>S', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = 'Substitute word under cursor' })
+
+-- Make file executable (moved to different key to avoid conflict)
+vim.keymap.set('n', '<leader>X', '<cmd>!chmod +x %<CR>', { desc = 'Make file executable', silent = true })
+
+-- [[ Custom Key Mappings ]]
+-- Insert Mode mappings
+vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Quick escape from insert mode' })
+
+-- Normal Mode mappings
+vim.keymap.set('n', '<C-n>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highlights' })
+vim.keymap.set('n', '<Space>', '/', { desc = 'Start search' })
+vim.keymap.set('n', 'K', 'i<CR><Esc>', { desc = 'Insert line break' })
+
+-- Leader key mappings
+vim.keymap.set('n', '<leader>a', '<cmd>BookmarkToggle<CR>', { desc = 'Toggle [A]nnotate bookmark' })
+vim.keymap.set('n', '<leader>A', '<cmd>BookmarkShowAll<CR>', { desc = 'Show [A]ll bookmarks' })
+vim.keymap.set('n', '<leader>s', '<cmd>w<CR>', { desc = '[S]ave file' })
+vim.keymap.set('n', '<leader>t', '<cmd>Telescope lsp_document_symbols<CR>', { desc = 'Go to [T]ype/symbol' })
+vim.keymap.set('n', '<leader>f', function() require('conform').format { async = true, lsp_fallback = true } end, { desc = '[F]ormat document' })
+vim.keymap.set('n', '<leader>r', '<cmd>Telescope oldfiles<CR>', { desc = 'Open [R]ecent files' })
+vim.keymap.set('n', '<leader>g', '<cmd>Telescope live_grep<CR>', { desc = 'Find in files ([G]rep)' })
+vim.keymap.set('n', '<leader>c', '<cmd>ToggleTerm<CR>', { desc = 'Toggle terminal ([C]ommand)' })
+vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file [E]xplorer' })
+vim.keymap.set('n', '<leader>d', '<cmd>CopilotChatToggle<CR>', { desc = 'Toggle Clau[D]e Code/Copilot Chat' })
+vim.keymap.set('n', '<leader>x', '<cmd>CopilotChatFix<CR>', { desc = 'Copilot fi[X] suggestion' })
+vim.keymap.set('n', '<leader>q', '<cmd>CopilotChatExplain<CR>', { desc = 'Copilot e[Q]plain code' })
+vim.keymap.set('n', '<leader>b', '<cmd>GitBlameToggle<CR>', { desc = 'Toggle git [B]lame' })
+vim.keymap.set('n', '<leader>w', '<C-w>w', { desc = 'S[W]itch windows (cycling)' })
+
+-- HOP (EasyMotion) mappings
+vim.keymap.set('n', '<leader><leader>w', '<cmd>HopWord<CR>', { desc = 'Hop to word' })
+vim.keymap.set('n', '<leader><leader>l', '<cmd>HopLine<CR>', { desc = 'Hop to line' })
+vim.keymap.set('n', '<leader><leader>c', '<cmd>HopChar1<CR>', { desc = 'Hop to character' })
+vim.keymap.set('n', '<leader><leader>/', '<cmd>HopPattern<CR>', { desc = 'Hop to pattern' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -280,19 +364,27 @@ require('lazy').setup({
       require('which-key').setup()
 
       -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+      require('which-key').add {
+        { ",c", group = "[C]ode" },
+        { ",c_", hidden = true },
+        { ",d", group = "[D]ocument" },
+        { ",d_", hidden = true },
+        { ",h", group = "[H]arpoon" },
+        { ",h_", hidden = true },
+        { ",r", group = "[R]efactor" },
+        { ",r_", hidden = true },
+        { ",s", group = "[S]earch/Substitute" },
+        { ",s_", hidden = true },
+        { ",t", group = "[T]erminal" },
+        { ",t_", hidden = true },
+        { ",w", group = "[W]orkspace" },
+        { ",w_", hidden = true },
+        { ",x", group = "Trouble/E[x]ecutive" },
+        { ",x_", hidden = true },
+        { ",S", group = "[S]ession" },
+        { ",S_", hidden = true },
+        { ",h", desc = "Git [H]unk", mode = "v" },
       }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
     end,
   },
 
@@ -565,30 +657,96 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
-        --
+        -- Web development
+        ts_ls = {},
+        html = {},
+        cssls = {},
+        jsonls = {},
+
+        -- Go development
+        gopls = {
+          settings = {
+            gopls = {
+              gofumpt = true,
+              codelenses = {
+                gc_details = false,
+                generate = true,
+                regenerate_cgo = true,
+                run_govulncheck = true,
+                test = true,
+                tidy = true,
+                upgrade_dependency = true,
+                vendor = true,
+              },
+              hints = {
+                assignVariableTypes = true,
+                compositeLiteralFields = true,
+                compositeLiteralTypes = true,
+                constantValues = true,
+                functionTypeParameters = true,
+                parameterNames = true,
+                rangeVariableTypes = true,
+              },
+              analyses = {
+                fieldalignment = true,
+                nilness = true,
+                unusedparams = true,
+                unusedwrite = true,
+                useany = true,
+              },
+              usePlaceholders = true,
+              completeUnimported = true,
+              staticcheck = true,
+              directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
+              semanticTokens = true,
+            },
+          },
+        },
+
+        -- Python development
+        pyright = {},
+
+        -- Rust development
+        rust_analyzer = {
+          settings = {
+            ["rust-analyzer"] = {
+              cargo = {
+                allFeatures = true,
+              },
+              checkOnSave = {
+                command = "clippy",
+              },
+            },
+          },
+        },
+
+        -- C/C++ development
+        clangd = {},
+
+        -- Bash/shell scripting
+        bashls = {},
+
+        -- YAML
+        yamlls = {},
+
+        -- Dockerfile
+        dockerls = {},
 
         lua_ls = {
-          -- cmd = {...},
-          -- filetypes = { ...},
-          -- capabilities = {},
           settings = {
             Lua = {
               completion = {
                 callSnippet = 'Replace',
               },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              -- diagnostics = { disable = { 'missing-fields' } },
+              diagnostics = {
+                globals = { 'vim' },
+              },
+              workspace = {
+                library = {
+                  [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+                  [vim.fn.stdpath("config") .. "/lua"] = true,
+                },
+              },
             },
           },
         },
@@ -607,6 +765,15 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettier', -- Web development formatting
+        'black', -- Python formatting
+        'isort', -- Python import sorting
+        'gofumpt', -- Go formatting
+        'goimports', -- Go import formatting
+        'shfmt', -- Shell script formatting
+        'yamlfmt', -- YAML formatting
+        'rustfmt', -- Rust formatting
+        'clang-format', -- C/C++ formatting
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -652,12 +819,29 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
-        -- javascript = { { "prettierd", "prettier" } },
+        python = { "isort", "black" },
+        go = { "goimports", "gofumpt" },
+        javascript = { "prettier" },
+        typescript = { "prettier" },
+        javascriptreact = { "prettier" },
+        typescriptreact = { "prettier" },
+        vue = { "prettier" },
+        css = { "prettier" },
+        scss = { "prettier" },
+        less = { "prettier" },
+        html = { "prettier" },
+        json = { "prettier" },
+        jsonc = { "prettier" },
+        yaml = { "yamlfmt" },
+        markdown = { "prettier" },
+        graphql = { "prettier" },
+        handlebars = { "prettier" },
+        rust = { "rustfmt" },
+        c = { "clang-format" },
+        cpp = { "clang-format" },
+        sh = { "shfmt" },
+        bash = { "shfmt" },
+        zsh = { "shfmt" },
       },
     },
   },
@@ -794,6 +978,300 @@ require('lazy').setup({
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
+  -- Better quickfix/location list
+  {
+    'kevinhwang91/nvim-bqf',
+    ft = 'qf',
+    opts = {},
+  },
+
+  -- Git integration
+  {
+    'tpope/vim-fugitive',
+    cmd = { 'Git', 'G' },
+  },
+
+  -- Multiple cursors
+  {
+    'mg979/vim-visual-multi',
+    event = 'VeryLazy',
+  },
+
+  -- Auto pairs for brackets, quotes, etc.
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = true,
+  },
+
+  -- Improved vim ui
+  {
+    'stevearc/dressing.nvim',
+    opts = {},
+  },
+
+  -- Buffer management
+  {
+    'akinsho/bufferline.nvim',
+    version = "*",
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    config = function()
+      require("bufferline").setup{
+        options = {
+          numbers = "ordinal",
+          diagnostics = "nvim_lsp",
+          separator_style = "slant",
+          show_buffer_close_icons = false,
+          show_close_icon = false,
+        }
+      }
+    end,
+  },
+
+  -- File explorer
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    config = function()
+      require('nvim-tree').setup({
+        disable_netrw = true,
+        hijack_netrw = true,
+        view = {
+          width = 30,
+          side = 'left',
+        },
+        renderer = {
+          highlight_git = true,
+          icons = {
+            show = {
+              git = true,
+            },
+          },
+        },
+        filters = {
+          dotfiles = false,
+          custom = { '.git', 'node_modules', '.cache' },
+        },
+      })
+      
+      -- Key mappings for nvim-tree
+      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle file [E]xplorer' })
+      vim.keymap.set('n', '<leader>o', ':NvimTreeFocus<CR>', { desc = 'Focus file explorer' })
+    end,
+  },
+
+  -- Enhanced terminal management
+  {
+    'akinsho/toggleterm.nvim',
+    version = "*",
+    config = function()
+      require("toggleterm").setup({
+        size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_filetypes = {},
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        direction = "float",
+        close_on_exit = true,
+        shell = vim.o.shell,
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+          highlights = {
+            border = "Normal",
+            background = "Normal",
+          },
+        },
+      })
+
+      -- Terminal keymaps
+      function _G.set_terminal_keymaps()
+        local opts = {buffer = 0}
+        vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+        vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+        vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+        vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+        vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+        vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+        vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
+      end
+
+      -- Apply terminal keymaps when entering terminal
+      vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+
+      -- Custom terminal functions
+      local Terminal = require('toggleterm.terminal').Terminal
+
+      -- Lazygit terminal
+      local lazygit = Terminal:new({
+        cmd = "lazygit",
+        dir = "git_dir",
+        direction = "float",
+        float_opts = {
+          border = "double",
+        },
+        on_open = function(term)
+          vim.cmd("startinsert!")
+          vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", {noremap = true, silent = true})
+        end,
+        on_close = function(term)
+          vim.cmd("startinsert!")
+        end,
+      })
+
+      -- Node terminal
+      local node = Terminal:new({
+        cmd = "node",
+        direction = "float",
+        float_opts = {
+          border = "double",
+        },
+      })
+
+      -- Python terminal
+      local python = Terminal:new({
+        cmd = "python3",
+        direction = "float",
+        float_opts = {
+          border = "double",
+        },
+      })
+
+      -- Horizontal terminal
+      local htop = Terminal:new({
+        cmd = "htop",
+        direction = "float",
+        float_opts = {
+          border = "double",
+        },
+      })
+
+      -- Key mappings for specific terminals
+      vim.keymap.set("n", ",tf", "<cmd>ToggleTerm direction=float<cr>", { desc = '[T]erminal [F]loating' })
+      vim.keymap.set("n", ",th", "<cmd>ToggleTerm size=10 direction=horizontal<cr>", { desc = '[T]erminal [H]orizontal' })
+      vim.keymap.set("n", ",tv", "<cmd>ToggleTerm size=80 direction=vertical<cr>", { desc = '[T]erminal [V]ertical' })
+      
+      -- Special terminals
+      vim.keymap.set("n", ",tg", function() lazygit:toggle() end, { desc = '[T]erminal [G]it (lazygit)' })
+      vim.keymap.set("n", ",tn", function() node:toggle() end, { desc = '[T]erminal [N]ode' })
+      vim.keymap.set("n", ",tp", function() python:toggle() end, { desc = '[T]erminal [P]ython' })
+      vim.keymap.set("n", ",tt", function() htop:toggle() end, { desc = '[T]erminal h[T]op' })
+    end,
+  },
+
+  -- Modern file navigation and search
+  {
+    'ThePrimeagen/harpoon',
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local harpoon = require("harpoon")
+      harpoon:setup()
+
+      vim.keymap.set("n", ",a", function() harpoon:list():add() end, { desc = "Harpoon [A]dd file" })
+      vim.keymap.set("n", ",h", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = "[H]arpoon menu" })
+
+      vim.keymap.set("n", ",1", function() harpoon:list():select(1) end, { desc = "Harpoon file 1" })
+      vim.keymap.set("n", ",2", function() harpoon:list():select(2) end, { desc = "Harpoon file 2" })
+      vim.keymap.set("n", ",3", function() harpoon:list():select(3) end, { desc = "Harpoon file 3" })
+      vim.keymap.set("n", ",4", function() harpoon:list():select(4) end, { desc = "Harpoon file 4" })
+
+      -- Toggle previous & next buffers stored within Harpoon list
+      vim.keymap.set("n", ",hp", function() harpoon:list():prev() end, { desc = "Harpoon [P]revious" })
+      vim.keymap.set("n", ",hn", function() harpoon:list():next() end, { desc = "Harpoon [N]ext" })
+    end,
+  },
+
+  -- Advanced code navigation and refactoring
+  {
+    'ThePrimeagen/refactoring.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('refactoring').setup()
+      
+      -- Refactor keymaps
+      vim.keymap.set("x", ",re", ":Refactor extract ", { desc = "[R]efactor [E]xtract" })
+      vim.keymap.set("x", ",rf", ":Refactor extract_to_file ", { desc = "[R]efactor extract to [F]ile" })
+      vim.keymap.set("x", ",rv", ":Refactor extract_var ", { desc = "[R]efactor extract [V]ariable" })
+      vim.keymap.set("n", ",ri", ":Refactor inline_var", { desc = "[R]efactor [I]nline variable" })
+      vim.keymap.set("n", ",rI", ":Refactor inline_func", { desc = "[R]efactor [I]nline function" })
+      vim.keymap.set("n", ",rb", ":Refactor extract_block", { desc = "[R]efactor extract [B]lock" })
+      vim.keymap.set("n", ",rbf", ":Refactor extract_block_to_file", { desc = "[R]efactor extract [B]lock to [F]ile" })
+    end,
+  },
+
+  -- Better quickfix and location list
+  {
+    'folke/trouble.nvim',
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("trouble").setup()
+      
+      vim.keymap.set("n", ",xx", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Trouble diagnostics" })
+      vim.keymap.set("n", ",xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Trouble buffer diagnostics" })
+      vim.keymap.set("n", ",cs", "<cmd>Trouble symbols toggle focus=false<cr>", { desc = "Trouble symbols" })
+      vim.keymap.set("n", ",cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", { desc = "Trouble LSP" })
+      vim.keymap.set("n", ",xL", "<cmd>Trouble loclist toggle<cr>", { desc = "Trouble location list" })
+      vim.keymap.set("n", ",xQ", "<cmd>Trouble qflist toggle<cr>", { desc = "Trouble quickfix list" })
+    end,
+  },
+
+  -- Enhanced notifications
+  {
+    'rcarriga/nvim-notify',
+    config = function()
+      require("notify").setup({
+        background_colour = "#000000",
+        render = "compact",
+        stages = "fade_in_slide_out",
+        timeout = 3000,
+      })
+      vim.notify = require("notify")
+    end,
+  },
+
+  -- Code outline and symbols
+  {
+    'stevearc/aerial.nvim',
+    opts = {},
+    dependencies = {
+       "nvim-treesitter/nvim-treesitter",
+       "nvim-tree/nvim-web-devicons"
+    },
+    config = function()
+      require("aerial").setup({
+        on_attach = function(bufnr)
+          vim.keymap.set("n", ",{", "<cmd>AerialPrev<CR>", {buffer = bufnr, desc = "Aerial previous symbol"})
+          vim.keymap.set("n", ",}", "<cmd>AerialNext<CR>", {buffer = bufnr, desc = "Aerial next symbol"})
+        end,
+      })
+      vim.keymap.set("n", ",a", "<cmd>AerialToggle!<CR>", { desc = "[A]erial toggle outline" })
+    end,
+  },
+
+  -- Session management
+  {
+    'rmagatti/auto-session',
+    config = function()
+      require("auto-session").setup({
+        log_level = "error",
+        auto_session_suppress_dirs = { "~/", "~/Projects", "~/Downloads", "/"},
+        auto_session_use_git_branch = true,
+      })
+      
+      vim.keymap.set("n", ",Ss", "<cmd>SessionSave<CR>", { desc = "[S]ession [S]ave" })
+      vim.keymap.set("n", ",Sr", "<cmd>SessionRestore<CR>", { desc = "[S]ession [R]estore" })
+      vim.keymap.set("n", ",Sd", "<cmd>SessionDelete<CR>", { desc = "[S]ession [D]elete" })
+    end,
+  },
+
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
     config = function()
@@ -835,7 +1313,15 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 
+        'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc',
+        -- Go development
+        'go', 'gomod', 'gowork', 'gosum', 'gotmpl',
+        -- Web development  
+        'javascript', 'typescript', 'tsx', 'css', 'json', 'jsonc',
+        -- Other useful parsers
+        'python', 'rust', 'yaml', 'toml', 'dockerfile', 'sql', 'comment'
+      },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -863,6 +1349,20 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  {
+    'ray-x/go.nvim',
+    dependencies = { -- optional packages
+      'ray-x/guihua.lua',
+      'neovim/nvim-lspconfig',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('go').setup()
+    end,
+    event = { 'CmdlineEnter' },
+    ft = { 'go', 'gomod' },
+    build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
+  },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -886,6 +1386,80 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   -- { import = 'custom.plugins' },
+  
+  -- Claude Code integration
+  {
+    'greggh/claude-code.nvim',
+    config = function()
+      require('claude-code').setup()
+    end,
+  },
+
+  -- GitHub Copilot integration
+  {
+    'github/copilot.vim',
+    event = 'InsertEnter',
+  },
+
+  -- GitHub Copilot Chat integration
+  {
+    'CopilotC-Nvim/CopilotChat.nvim',
+    branch = 'main',
+    dependencies = {
+      { 'github/copilot.vim' },
+      { 'nvim-lua/plenary.nvim' },
+    },
+    config = function()
+      require('CopilotChat').setup({
+        debug = false,
+        window = {
+          layout = 'float',
+          width = 0.8,
+          height = 0.8,
+          relative = 'editor',
+        },
+      })
+    end,
+  },
+
+  -- Modern EasyMotion alternative
+  {
+    'phaazon/hop.nvim',
+    branch = 'v2',
+    config = function()
+      require('hop').setup()
+    end,
+  },
+
+  -- Bookmarks plugin
+  {
+    'MattesGroeger/vim-bookmarks',
+    config = function()
+      -- Disable default key mappings
+      vim.g.bookmark_no_default_key_mappings = 1
+      -- Configure bookmark settings
+      vim.g.bookmark_save_per_working_dir = 1
+      vim.g.bookmark_auto_save = 1
+      vim.g.bookmark_highlight_lines = 1
+      vim.g.bookmark_show_warning = 0
+      vim.g.bookmark_center = 1
+      vim.g.bookmark_location_list = 1
+    end,
+  },
+
+  -- Git blame plugin
+  {
+    'f-person/git-blame.nvim',
+    config = function()
+      require('gitblame').setup({
+        enabled = false, -- Start disabled, toggle with keymap
+        date_format = '%r',
+        message_template = ' <summary> • <date> • <author>',
+        message_when_not_committed = ' Not yet committed',
+        highlight_group = 'Question',
+      })
+    end,
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -905,6 +1479,10 @@ require('lazy').setup({
       task = '📌',
       lazy = '💤 ',
     },
+  },
+  -- Disable luarocks support to prevent warnings since we don't use it
+  rocks = {
+    enabled = false,
   },
 })
 
