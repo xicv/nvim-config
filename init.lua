@@ -99,6 +99,18 @@ vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
 vim.g.loaded_python3_provider = 0
 
+-- Additional performance optimizations
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+vim.g.loaded_matchparen = 1
+vim.g.loaded_tarPlugin = 1
+vim.g.loaded_tar = 1
+vim.g.loaded_zipPlugin = 1
+vim.g.loaded_zip = 1
+vim.g.loaded_gzip = 1
+vim.g.loaded_2html_plugin = 1
+vim.g.loaded_tutor_mode_plugin = 1
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -162,6 +174,11 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+
+-- Performance optimizations
+vim.opt.lazyredraw = true
+vim.opt.regexpengine = 1
+vim.opt.synmaxcol = 300
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -252,27 +269,17 @@ vim.keymap.set('n', '<C-n>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highl
 vim.keymap.set('n', '<Space>', '/', { desc = 'Start search' })
 vim.keymap.set('n', 'K', 'i<CR><Esc>', { desc = 'Insert line break' })
 
--- Leader key mappings
-vim.keymap.set('n', '<leader>a', '<cmd>BookmarkToggle<CR>', { desc = 'Toggle [A]nnotate bookmark' })
-vim.keymap.set('n', '<leader>A', '<cmd>BookmarkShowAll<CR>', { desc = 'Show [A]ll bookmarks' })
+-- Leader key mappings (only those not handled by plugin key definitions)
 vim.keymap.set('n', '<leader>s', '<cmd>w<CR>', { desc = '[S]ave file' })
 vim.keymap.set('n', '<leader>t', '<cmd>Telescope lsp_document_symbols<CR>', { desc = 'Go to [T]ype/symbol' })
 vim.keymap.set('n', '<leader>f', function() require('conform').format { async = true, lsp_fallback = true } end, { desc = '[F]ormat document' })
 vim.keymap.set('n', '<leader>r', '<cmd>Telescope oldfiles<CR>', { desc = 'Open [R]ecent files' })
 vim.keymap.set('n', '<leader>g', '<cmd>Telescope live_grep<CR>', { desc = 'Find in files ([G]rep)' })
 vim.keymap.set('n', '<leader>c', '<cmd>ToggleTerm<CR>', { desc = 'Toggle terminal ([C]ommand)' })
-vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file [E]xplorer' })
 vim.keymap.set('n', '<leader>d', '<cmd>CopilotChatToggle<CR>', { desc = 'Toggle Clau[D]e Code/Copilot Chat' })
 vim.keymap.set('n', '<leader>x', '<cmd>CopilotChatFix<CR>', { desc = 'Copilot fi[X] suggestion' })
 vim.keymap.set('n', '<leader>q', '<cmd>CopilotChatExplain<CR>', { desc = 'Copilot e[Q]plain code' })
-vim.keymap.set('n', '<leader>b', '<cmd>GitBlameToggle<CR>', { desc = 'Toggle git [B]lame' })
 vim.keymap.set('n', '<leader>w', '<C-w>w', { desc = 'S[W]itch windows (cycling)' })
-
--- HOP (EasyMotion) mappings
-vim.keymap.set('n', '<leader><leader>w', '<cmd>HopWord<CR>', { desc = 'Hop to word' })
-vim.keymap.set('n', '<leader><leader>l', '<cmd>HopLine<CR>', { desc = 'Hop to line' })
-vim.keymap.set('n', '<leader><leader>c', '<cmd>HopChar1<CR>', { desc = 'Hop to character' })
-vim.keymap.set('n', '<leader><leader>/', '<cmd>HopPattern<CR>', { desc = 'Hop to pattern' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -310,7 +317,7 @@ vim.opt.rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
+  { 'tpope/vim-sleuth', event = 'VeryLazy' }, -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -322,7 +329,14 @@ require('lazy').setup({
   --    require('Comment').setup({})
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 
+    'numToStr/Comment.nvim', 
+    keys = {
+      { 'gc', mode = { 'n', 'v' } },
+      { 'gb', mode = { 'n', 'v' } },
+    },
+    opts = {}
+  },
 
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
@@ -331,6 +345,7 @@ require('lazy').setup({
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
     opts = {
       signs = {
         add = { text = '+' },
@@ -775,7 +790,12 @@ require('lazy').setup({
         'rustfmt', -- Rust formatting
         'clang-format', -- C/C++ formatting
       })
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      require('mason-tool-installer').setup { 
+        ensure_installed = ensure_installed,
+        auto_update = false, -- Disable auto-update for better performance
+        run_on_start = true,
+        start_delay = 3000, -- Delay installation to improve startup time
+      }
 
       require('mason-lspconfig').setup {
         handlers = {
@@ -1007,6 +1027,7 @@ require('lazy').setup({
   -- Improved vim ui
   {
     'stevearc/dressing.nvim',
+    event = 'VeryLazy',
     opts = {},
   },
 
@@ -1014,6 +1035,7 @@ require('lazy').setup({
   {
     'akinsho/bufferline.nvim',
     version = "*",
+    event = 'VeryLazy',
     dependencies = 'nvim-tree/nvim-web-devicons',
     config = function()
       require("bufferline").setup{
@@ -1031,6 +1053,11 @@ require('lazy').setup({
   -- File explorer
   {
     'nvim-tree/nvim-tree.lua',
+    cmd = { 'NvimTreeToggle', 'NvimTreeOpen', 'NvimTreeFocus' },
+    keys = {
+      { '<leader>e', '<cmd>NvimTreeToggle<CR>', desc = 'Toggle file [E]xplorer' },
+      { '<leader>o', '<cmd>NvimTreeFocus<CR>', desc = 'Focus file explorer' },
+    },
     dependencies = 'nvim-tree/nvim-web-devicons',
     config = function()
       require('nvim-tree').setup({
@@ -1053,10 +1080,6 @@ require('lazy').setup({
           custom = { '.git', 'node_modules', '.cache' },
         },
       })
-      
-      -- Key mappings for nvim-tree
-      vim.keymap.set('n', '<leader>e', ':NvimTreeToggle<CR>', { desc = 'Toggle file [E]xplorer' })
-      vim.keymap.set('n', '<leader>o', ':NvimTreeFocus<CR>', { desc = 'Focus file explorer' })
     end,
   },
 
@@ -1311,6 +1334,7 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    event = { 'BufReadPre', 'BufNewFile' },
     build = ':TSUpdate',
     opts = {
       ensure_installed = { 
@@ -1330,8 +1354,19 @@ require('lazy').setup({
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
+        -- Disable treesitter for large files to improve performance
+        disable = function(lang, buf)
+          local max_filesize = 100 * 1024 -- 100 KB
+          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          if ok and stats and stats.size > max_filesize then
+            return true
+          end
+        end,
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { 
+        enable = true, 
+        disable = { 'ruby' },
+      },
     },
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
@@ -1359,7 +1394,6 @@ require('lazy').setup({
     config = function()
       require('go').setup()
     end,
-    event = { 'CmdlineEnter' },
     ft = { 'go', 'gomod' },
     build = ':lua require("go.install").update_all_sync()', -- if you need to install/update all binaries
   },
@@ -1390,6 +1424,7 @@ require('lazy').setup({
   -- Claude Code integration
   {
     'greggh/claude-code.nvim',
+    cmd = { 'Claude', 'ClaudeCode' },
     config = function()
       require('claude-code').setup()
     end,
@@ -1405,6 +1440,13 @@ require('lazy').setup({
   {
     'CopilotC-Nvim/CopilotChat.nvim',
     branch = 'main',
+    cmd = {
+      'CopilotChat',
+      'CopilotChatOpen',
+      'CopilotChatToggle',
+      'CopilotChatFix',
+      'CopilotChatExplain',
+    },
     dependencies = {
       { 'github/copilot.vim' },
       { 'nvim-lua/plenary.nvim' },
@@ -1426,6 +1468,12 @@ require('lazy').setup({
   {
     'phaazon/hop.nvim',
     branch = 'v2',
+    keys = {
+      { '<leader><leader>w', '<cmd>HopWord<CR>', desc = 'Hop to word' },
+      { '<leader><leader>l', '<cmd>HopLine<CR>', desc = 'Hop to line' },
+      { '<leader><leader>c', '<cmd>HopChar1<CR>', desc = 'Hop to character' },
+      { '<leader><leader>/', '<cmd>HopPattern<CR>', desc = 'Hop to pattern' },
+    },
     config = function()
       require('hop').setup()
     end,
@@ -1434,6 +1482,10 @@ require('lazy').setup({
   -- Bookmarks plugin
   {
     'MattesGroeger/vim-bookmarks',
+    keys = {
+      { '<leader>a', '<cmd>BookmarkToggle<CR>', desc = 'Toggle [A]nnotate bookmark' },
+      { '<leader>A', '<cmd>BookmarkShowAll<CR>', desc = 'Show [A]ll bookmarks' },
+    },
     config = function()
       -- Disable default key mappings
       vim.g.bookmark_no_default_key_mappings = 1
@@ -1450,6 +1502,9 @@ require('lazy').setup({
   -- Git blame plugin
   {
     'f-person/git-blame.nvim',
+    keys = {
+      { '<leader>b', '<cmd>GitBlameToggle<CR>', desc = 'Toggle git [B]lame' },
+    },
     config = function()
       require('gitblame').setup({
         enabled = false, -- Start disabled, toggle with keymap
@@ -1478,6 +1533,21 @@ require('lazy').setup({
       start = '🚀',
       task = '📌',
       lazy = '💤 ',
+    },
+  },
+  -- Performance optimizations
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        'gzip',
+        'matchit',
+        'matchparen',
+        'netrwPlugin',
+        'tarPlugin',
+        'tohtml',
+        'tutor',
+        'zipPlugin',
+      },
     },
   },
   -- Disable luarocks support to prevent warnings since we don't use it
