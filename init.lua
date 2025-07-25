@@ -282,6 +282,8 @@ vim.keymap.set('n', '<leader>X', '<cmd>!chmod +x %<CR>', { desc = 'Make file exe
 -- [[ Custom Key Mappings ]]
 -- Insert Mode mappings
 vim.keymap.set('i', 'jj', '<Esc>', { desc = 'Quick escape from insert mode' })
+vim.keymap.set('i', '<C-f>', '<Right>', { desc = 'Move cursor forward (right) in insert mode' })
+vim.keymap.set('i', '<C-b>', '<Left>', { desc = 'Move cursor backward (left) in insert mode' })
 
 -- Normal Mode mappings
 vim.keymap.set('n', '<C-n>', '<cmd>nohlsearch<CR>', { desc = 'Clear search highlights' })
@@ -294,7 +296,7 @@ vim.keymap.set('n', '<leader>t', '<cmd>Telescope lsp_document_symbols<CR>', { de
 vim.keymap.set('n', '<leader>f', function() require('conform').format { async = true, lsp_fallback = true } end, { desc = '[F]ormat document' })
 vim.keymap.set('n', '<leader>r', '<cmd>Telescope oldfiles<CR>', { desc = 'Open [R]ecent files' })
 vim.keymap.set('n', '<leader>g', '<cmd>Telescope live_grep<CR>', { desc = 'Find in files ([G]rep)' })
-vim.keymap.set('n', '<leader>c', '<cmd>ToggleTerm<CR>', { desc = 'Toggle terminal ([C]ommand)' })
+vim.keymap.set('n', '<leader>c', '<cmd>ToggleTerm direction=vertical size=80<CR>', { desc = 'Toggle terminal ([C]ommand)' })
 vim.keymap.set('n', '<leader>d', '<cmd>CopilotChatToggle<CR>', { desc = 'Toggle Clau[D]e Code/Copilot Chat' })
 vim.keymap.set('n', '<leader>x', '<cmd>CopilotChatFix<CR>', { desc = 'Copilot fi[X] suggestion' })
 vim.keymap.set('n', '<leader>q', '<cmd>CopilotChatExplain<CR>', { desc = 'Copilot e[Q]plain code' })
@@ -992,9 +994,11 @@ require('lazy').setup({
               luasnip.expand_or_jump()
             end
           end, { 'i', 's' }),
-          ['<C-h>'] = cmp.mapping(function()
+          ['<C-h>'] = cmp.mapping(function(fallback)
             if luasnip.locally_jumpable(-1) then
               luasnip.jump(-1)
+            else
+              fallback()
             end
           end, { 'i', 's' }),
 
@@ -1122,7 +1126,7 @@ require('lazy').setup({
     version = "*",
     config = function()
       require("toggleterm").setup({
-        size = 20,
+        size = 80,
         open_mapping = [[<c-\>]],
         hide_numbers = true,
         shade_filetypes = {},
@@ -1131,7 +1135,7 @@ require('lazy').setup({
         start_in_insert = true,
         insert_mappings = true,
         persist_size = true,
-        direction = "float",
+        direction = "vertical",
         close_on_exit = true,
         shell = vim.o.shell,
         float_opts = {
@@ -1547,6 +1551,16 @@ require('lazy').setup({
         highlight_group = 'Question',
       })
     end,
+  },
+
+  -- Undo tree visualization
+  {
+    'jiaoshijie/undotree',
+    dependencies = 'nvim-lua/plenary.nvim',
+    config = true,
+    keys = {
+      { '<leader>u', '<cmd>lua require("undotree").toggle()<cr>', desc = 'Toggle [U]ndo tree' },
+    },
   },
 }, {
   ui = {
