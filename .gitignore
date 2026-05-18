@@ -1,0 +1,18 @@
+# Editor / OS scratch
+tags
+.luarc.json
+.DS_Store
+*.swp
+*.swo
+
+# Test / scratch artifacts
+test.sh
+nvim
+spell/
+
+# Sensitive — never commit
+.env
+.env.*
+*.pem
+*.key
+secrets/
