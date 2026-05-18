@@ -49,7 +49,11 @@ return {
         end,
         desc = 'Claude: send path as @-ref (+ copy to clipboard)',
       },
+      -- ,as is mode-aware:
+      --   visual mode  → send the highlighted text to Claude.
+      --   normal mode  → send the current file path as @-ref (same as ,ab).
       { '<leader>as', '<cmd>ClaudeCodeSend<cr>', desc = 'Claude: [S]end selection', mode = 'v' },
+      { '<leader>as', '<cmd>ClaudeCodeAdd %<cr>', desc = 'Claude: [S]end current file', mode = 'n' },
       { '<leader>aa', '<cmd>ClaudeCodeDiffAccept<cr>', desc = 'Claude: [A]ccept diff' },
       { '<leader>ad', '<cmd>ClaudeCodeDiffDeny<cr>', desc = 'Claude: [D]eny diff' },
       { '<leader>aS', '<cmd>ClaudeCodeStatus<cr>', desc = 'Claude: [S]tatus (WebSocket lock file)' },
