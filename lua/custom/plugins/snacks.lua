@@ -210,10 +210,13 @@ return {
           files = { hidden = true, ignored = false },
           grep = { hidden = true, ignored = false },
           explorer = {
-            -- Show dotfiles by default; keep gitignored hidden so node_modules
-            -- and friends don't flood the tree. Toggle with H / I.
+            -- Show dotfiles AND gitignored entries in the tree (the latter
+            -- get dimmed for visual distinction). Reason: project-local
+            -- folders like .projectasks/ or .docs/ are commonly gitignored
+            -- but you still want to browse them. Toggle with H / I.
             hidden = true,
-            ignored = false,
+            ignored = true,
+            git_untracked = true,
             -- Left sidebar, 30% width, no preview pane. Press ,e to toggle.
             layout = {
               preset = 'sidebar',
