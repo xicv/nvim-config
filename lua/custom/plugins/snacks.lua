@@ -202,8 +202,18 @@ return {
 
       picker = {
         enabled = true,
+        -- Default to showing dotfiles. Toggle at runtime with `H` (hidden)
+        -- and `I` (ignored / gitignored) inside any picker.
+        hidden = true,
+        ignored = false,
         sources = {
+          files = { hidden = true, ignored = false },
+          grep = { hidden = true, ignored = false },
           explorer = {
+            -- Show dotfiles by default; keep gitignored hidden so node_modules
+            -- and friends don't flood the tree. Toggle with H / I.
+            hidden = true,
+            ignored = false,
             -- Left sidebar, 30% width, no preview pane. Press ,e to toggle.
             layout = {
               preset = 'sidebar',
